@@ -56,7 +56,8 @@ export default function KortScreen({ route }) { // I denne funktion findes barer
         };
     }, []);
 
-    useEffect(() => { // <------
+    // Når man trykker på "Vis på kort" flyttes kortet hen til baren og zoomer ind. tid gør at det også virker hvis man trykker på den samme bar to gange 
+    useEffect(() => { 
         const bar = barer[route.params?.bar];
         if (!bar) return;
         setValgtOmraade(OMRAADER[bar.omraade] ? bar.omraade : 'København');

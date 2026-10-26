@@ -1,41 +1,44 @@
+//Det nye der ertilføjet i denne er at man kan opdatere tillæg, hvis man ikke tidligere havde tillæg eller vil gøre det højere. <-----
 //Dette er oversigt visningen i menubaren, som er "MinBar's" data om køb og salg af timer. 
 //Der er også en liste med "Vagter vi har købt" og "Timer vi har udbudt", hvor udbudte timer kan slettes. 
 
+// Der importeres nu nogle felter, data og funktioner som understøtter funktionaliteten af tillæg <-----
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, Text, TextInput, View, } from 'react-native'; // <------
-import { onValue, ref, remove, update } from 'firebase/database'; // <------
+import { ActivityIndicator, Alert, Pressable, ScrollView, Text, TextInput, View, } from 'react-native'; 
+import { onValue, ref, remove, update } from 'firebase/database'; 
 import { db } from '../firebaseConfig';
 import { MIN_BAR } from '../LokalTestData/minBar';
 import { colors, globalStyles } from '../styles/globalStyles';
-import { TILLAEG_TYPER } from './SaelgTimerScreen'; // <------
+import { TILLAEG_TYPER } from './SaelgTimerScreen'; 
 
 export default function OversigtScreen() {
     const [vagter, setVagter] = useState([]);
     const [indlaeser, setIndlaeser] = useState(true);
-    const [aabenTillaeg, setAabenTillaeg] = useState(null); // <------
-    const [redigerType, setRedigerType] = useState('Ingen'); // <------
-    const [redigerBeloeb, setRedigerBeloeb] = useState(''); // <------
 
-    //Lytter på samme måde som i "Køb vagter", men her hentes alle vagter uden at filtere endnu, da der både skal bruges solgte og købte.
+// Her holdes der styr på hvilken vagt der har tillægsfeltet åbent med vagtens id, så der kun kan være en åben af gangen. Hvis man ændre noget gemmes det først i Firebase når man trykker gem. <-----
+    const [aabenTillaeg, setAabenTillaeg] = useState(null); 
+    const [redigerType, setRedigerType] = useState('Ingen'); 
+    const [redigerBeloeb, setRedigerBeloeb] = useState(''); 
+
     useEffect(() => {
         const vagterRef = ref(db, 'vagter');
         const unsubscribe = onValue(vagterRef, (snapshot) => {
             const data = snapshot.val();
             setVagter(
-                data ? Object.entries(data).map(([id, vagt]) => ({ id, ...vagt })) : [] //Restrukturere objektet
+                data ? Object.entries(data).map(([id, vagt]) => ({ id, ...vagt })) : [] 
             );
             setIndlaeser(false);
         });
         return () => unsubscribe();
     }, []);
 
-    // Selve sletnings funktionen, reelt en delete fra CRUD. remove fjerner vagten permanent
+// Selve sletnings funktionen af en vagt, en delete fra CRUD, hvor remove fjerner vagten permanent fra Firebase <-----
     const sletVagt = async (vagt) => {
 
-        await remove(ref(db, 'vagter/' + vagt.id)); // onValue opdager selv at vagten ikke er der og listen tegnes igen, så der behøves ikke opdateres.
+        await remove(ref(db, 'vagter/' + vagt.id)); 
     };
 
-    const aabnTillaeg = (vagt) => { // <------
+    const aabnTillaeg = (vagt) => { // Dne præcise funktion der åbner tillæg for en given vagt der endnu ikke er blevet solgt/udlejet. Viser den værdi der allerede er gemt, hvsi der er en, så man kan se hvad man ændre det fra <------
         if (aabenTillaeg === vagt.id) {
             setAabenTillaeg(null);
             return;
@@ -44,8 +47,7 @@ export default function OversigtScreen() {
         setRedigerBeloeb(vagt.tillaegBeloeb ? String(vagt.tillaegBeloeb) : '');
         setAabenTillaeg(vagt.id);
     };
-
-    const gemTillaeg = async (vagt) => { // <------
+    const gemTillaeg = async (vagt) => { // Opdatere værdien i firebase hvis det indsatte beløb følger reglerne. <------
         const beloeb = redigerType === 'Ingen' ? 0 : Number(redigerBeloeb);
         if (redigerType !== 'Ingen' && (isNaN(beloeb) || beloeb <= 0)) {
             Alert.alert('Ugyldigt tillæg', 'Skriv et beløb større end 0, eller vælg "Ingen".');
@@ -62,7 +64,7 @@ export default function OversigtScreen() {
         }
     };
 
-    // En funktion der spørger om du er sikker på at du vi bekræfte din slettelse af en udbudt vagt
+    // En funktion der spørger om du er sikker på at du vi bekræfte din slettelse af en udbudt vagt <-----
     const bekraeftSlet = (vagt) => {
         Alert.alert(
             'Træk udbuddet tilbage?',
@@ -91,7 +93,8 @@ export default function OversigtScreen() {
     const timerSolgt = solgte.reduce((sum, vagt) => sum + vagt.timer, 0);
     const timerKoebt = koebte.reduce((sum, vagt) => sum + vagt.timer, 0);
     const indtaegt = solgte.reduce((sum, v) => sum + v.timer * v.timeloen, 0);
-    const udgift = koebte.reduce((sum, v) => sum + v.timer * v.timeloen + (v.tillaegBeloeb || 0), 0); // <------
+    // Tillægget lægges til udgiften på købte vagter, da det er køberen der betaler det. || 0 gør at gamle vagter uden tillæg ikke giver fejl.
+    const udgift = koebte.reduce((sum, v) => sum + v.timer * v.timeloen + (v.tillaegBeloeb || 0), 0); 
     const netto = indtaegt - udgift;
 
     return (
@@ -136,7 +139,8 @@ export default function OversigtScreen() {
                         <Text style={globalStyles.tal}>
                             {vagt.timer} timer · {vagt.timeloen} kr/t
                         </Text>
-                        <Text style={globalStyles.kortUnderTekst}>{/* <------ */}
+                        {/* Tillægget vises altid på købte vagter, også når der ikke er noget, så det er tydeligt hvad vagten har kostet. <------------*/}
+                        <Text style={globalStyles.kortUnderTekst}>
                             {vagt.tillaegBeloeb > 0 ? 'Tillæg: ' + vagt.tillaeg + ' · ' + vagt.tillaegBeloeb + ' kr' : 'Tillæg: Ingen'}
                         </Text>
                         <Text style={globalStyles.kortUnderTekst}>
@@ -164,7 +168,8 @@ export default function OversigtScreen() {
                             {vagt.timer} timer · {vagt.timeloen} kr/t
                         </Text>
 
-                        <Text style={globalStyles.kortUnderTekst}>{/* <------ */}
+                        {/* Samme tillægslinje på egne udbudte vagter, så man kan se hvilket tillæg man selv har sat. */}
+                        <Text style={globalStyles.kortUnderTekst}>
                             {vagt.tillaegBeloeb > 0 ? 'Tillæg: ' + vagt.tillaeg + ' · ' + vagt.tillaegBeloeb + ' kr' : 'Tillæg: Ingen'}
                         </Text>
 
@@ -174,17 +179,17 @@ export default function OversigtScreen() {
                             </Text>
                         )}
 
-                        {/*
-                        Slet-knappen vises kun på vagter, ingen har booket endnu. */}
                         {vagt.status === 'ledig' && (
-                            <View style={globalStyles.knapRaekke}>{/* <------ */}
+                            // Her lægges "Træk tilbage" og den nye "Tillæg" knap ved siden af hinanden <-----
+                            <View style={globalStyles.knapRaekke}>
                                 <Pressable
                                     style={globalStyles.sletKnap}
                                     onPress={() => bekraeftSlet(vagt)}
                                 >
                                     <Text style={globalStyles.sletTekst}>Træk tilbage</Text>
                                 </Pressable>
-                                <Pressable // <------
+                                {/* Den nye Tillæg knap. Åbner feltet hvor man kan vælge eller rette tillægget på sin egen vagt. <---------- */}
+                                <Pressable 
                                     style={globalStyles.tillaegKnap}
                                     onPress={() => aabnTillaeg(vagt)}
                                 >
@@ -193,7 +198,8 @@ export default function OversigtScreen() {
                             </View>
                         )}
 
-                        {aabenTillaeg === vagt.id && ( // <------
+                        {aabenTillaeg === vagt.id && ( 
+                            // Tillægsfeltet vises kun på den vagt der er åben <-----
                             <View>
                                 <View style={globalStyles.tillaegValg}>
                                     {TILLAEG_TYPER.map((type) => {

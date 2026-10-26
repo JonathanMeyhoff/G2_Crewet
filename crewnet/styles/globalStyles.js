@@ -36,6 +36,7 @@ export const globalStyles = StyleSheet.create({
         flexDirection: 'row',
         gap: 8,
     },
+    // Nye styles i G2 til tillægsfunktionen i Oversigt. knapRaekke lægger knapperne ved siden af hinanden, tillaegKnap og tillaegTekst er en guld version af slet-knappen, og tillaegValg og tillaegInput er feltet der folder sig ud.
     knapRaekke: { flexDirection: 'row', gap: 8 }, // <------
     tillaegKnap: { // <------
         alignSelf: 'flex-start',

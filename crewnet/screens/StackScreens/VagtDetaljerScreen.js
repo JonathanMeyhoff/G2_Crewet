@@ -1,3 +1,4 @@
+//Tilføjelsen i G2 til denne visning/fane består af en knap "Vis på kort", hvor brugeren tages til lokationen af baren
 // Den visning der kommer når man trykker på et liste elemnt og ser vagtdetaljer. Er ikke en selvstændigvisning da det er en stack oven på listen køb vagter
 //Det er her selve handlen mellem barer sker, hvor man booker en bartender.
 
@@ -48,6 +49,7 @@ export default function VagtDetaljerScreen({ navigation, route }) { //Den bruger
                 <Text style={globalStyles.label}>TIMELØN</Text>
                 <Text style={globalStyles.vaerdi}>{vagt.timeloen} kr/t</Text>
             </View>
+            {/* G2: Ny række med tillægget, vises altid på samme måde som de andre oplysninger, også når der ikke er noget. */}
             <View style={globalStyles.raekke}>{/* <------ */}
                 <Text style={globalStyles.label}>TILLÆG</Text>
                 <Text style={globalStyles.vaerdi}>
@@ -55,8 +57,9 @@ export default function VagtDetaljerScreen({ navigation, route }) { //Den bruger
                 </Text>
             </View>
             <View style={globalStyles.raekke}>
+                {/* I alt er nu timer gange løn plus tillæg. || 0 gør at vagter uden tillæg stadig virker  <----------- */}
                 <Text style={globalStyles.label}>I ALT</Text>
-                <Text style={globalStyles.vaerdi}>{vagt.timer * vagt.timeloen + (vagt.tillaegBeloeb || 0)} kr</Text>{/* <------ */}
+                <Text style={globalStyles.vaerdi}>{vagt.timer * vagt.timeloen + (vagt.tillaegBeloeb || 0)} kr</Text>
             </View>
 
             {/* Herunder er det element, der adskiller CrewNet fra en åben vikarapp. Køberen kan se, hvem der giver god for bartenderen. Reelt set også bare mere information*/}
@@ -76,7 +79,8 @@ export default function VagtDetaljerScreen({ navigation, route }) { //Den bruger
                 Medarbejderen får sin normale løn. I betaler {vagt.virksomhed} for timerne.
             </Text>
 
-            <ButtonComponent title="Vis på kort" onPress={visPaaKort} />{/* <------ */}
+            {/* Knappen der sender en videre til kortet, se visPaaKort ovenfor  <------------- */}
+            <ButtonComponent title="Vis på kort" onPress={visPaaKort} />
             <ButtonComponent title="Book Crew" onPress={bookCrew} />
             <ButtonComponent title="Tilbage" onPress={() => navigation.goBack()} />
         </View>

@@ -10,13 +10,12 @@ import { MINE_MEDARBEJDERE } from '../LokalTestData/medarbejdere';
 import { colors, globalStyles } from '../styles/globalStyles';
 import ButtonComponent from '../components/ButtonComponent';
 
-// De roller en bar kan udbyde deres medarbejdere som. Ligger her fordi de kun bruges på denne skærm. 
 const ROLLER = ['Bartender', 'Cocktailbartender', 'Barback'];
-export const TILLAEG_TYPER = ['Ingen', 'Transport', 'Akut', 'Kort varsel']; // <------
+export const TILLAEG_TYPER = ['Ingen', 'Transport', 'Akut', 'Kort varsel']; // De typer tillæg man kan give bartenderen  <------
 
 export default function SaelgTimerScreen() {
 
-    //Her opdaterers værdierne man skriver ind.
+//Her opdaterers værdierne man skriver ind i tillægss feltet   <------
     const [medarbejder, setMedarbejder] = useState(MINE_MEDARBEJDERE[0]);
     const [rolle, setRolle] = useState(ROLLER[0]);
     const [dato, setDato] = useState('');
@@ -24,8 +23,10 @@ export default function SaelgTimerScreen() {
     const [til, setTil] = useState('');
     const [timer, setTimer] = useState('');
     const [timeloen, setTimeloen] = useState('');
-    const [tillaegType, setTillaegType] = useState('Ingen'); // <------
-    const [tillaegBeloeb, setTillaegBeloeb] = useState(''); // <------
+
+ // Tillæggets type og beløb. Starter på Ingen, så der ikke er tillæg som standard  <------
+    const [tillaegType, setTillaegType] = useState('Ingen'); 
+    const [tillaegBeloeb, setTillaegBeloeb] = useState(''); 
 
     //En funktion til at slå knappen "Udbyd vagt" midlertidigt fra mens man skrive så man ikke kan nå at trykke to gange og oprette vagten dobbelt.
     const [gemmer, setGemmer] = useState(false);
@@ -34,7 +35,7 @@ export default function SaelgTimerScreen() {
     const timerTal = Number(timer);
     const loenTal = Number(timeloen);
     const ialt = timerTal * loenTal;
-    const tillaegTal = tillaegType === 'Ingen' ? 0 : Number(tillaegBeloeb); // <------
+    const tillaegTal = tillaegType === 'Ingen' ? 0 : Number(tillaegBeloeb); // Laver beløbet om til et tal ligesom timer og løn, så det senere kan bruges i begreningen i oversigt <------
 
     //Nulstille formularen når vagten er lagt op så man kan lave den næste med det samme
     const nulstil = () => {
@@ -45,8 +46,10 @@ export default function SaelgTimerScreen() {
         setTimeloen('');
         setMedarbejder(MINE_MEDARBEJDERE[0]);
         setRolle(ROLLER[0]);
-        setTillaegType('Ingen'); // <------
-        setTillaegBeloeb(''); // <------
+       
+        // Tillægget nulstilles også, så den næste vagt starter uden tillæg.
+        setTillaegType('Ingen'); 
+        setTillaegBeloeb(''); 
     };
 
     const udbydVagt = async () => {
@@ -68,7 +71,8 @@ export default function SaelgTimerScreen() {
             return;
         }
 
-        if (tillaegType !== 'Ingen' && (isNaN(tillaegTal) || tillaegTal <= 0)) { // <------
+        // Har man valgt et tillæg skal der også være et beløb over 0, ellers fejl ligesom ved timer og løn  <------
+        if (tillaegType !== 'Ingen' && (isNaN(tillaegTal) || tillaegTal <= 0)) {
             Alert.alert('Ugyldigt tillæg', 'Skriv et beløb større end 0, eller vælg "Ingen".');
             return;
         }
@@ -88,8 +92,10 @@ export default function SaelgTimerScreen() {
                 verificeredeTimer: medarbejder.verificeredeTimer,
                 status: 'ledig',
                 booket_af: '',
-                tillaeg: tillaegType, // <------
-                tillaegBeloeb: tillaegTal, // <------
+                
+                // Tillægget gemmes på vagten i Firebase sammen med resten, så andre barer kan se det på vagtdetaljer og så det senere kan bruges/kaldes
+                tillaeg: tillaegType,
+                tillaegBeloeb: tillaegTal, 
             });
 
             nulstil();
@@ -98,7 +104,6 @@ export default function SaelgTimerScreen() {
             Alert.alert('Kunne ikke gemme', 'Tjek forbindelsen og prøv igen.');
             console.log('Fejl ved oprettelse:', fejl);
         } finally {
-            // finally kører uanset om det virkede eller ej, så knappen aldrig sidder fast i "gemmer" status.
             setGemmer(false);
         }
     };
@@ -230,7 +235,8 @@ export default function SaelgTimerScreen() {
                     </View>
                 </View>
 
-                <Text style={globalStyles.feltLabel}>TILLÆG TIL BARTENDEREN</Text>{/* <------ */}
+                {/* Valg af tillæg til bartenderen, bygget på samme måde som valg af rolle ovenfor.  <-------------     */}
+                <Text style={globalStyles.feltLabel}>TILLÆG TIL BARTENDEREN</Text>
                 <View style={globalStyles.valgRaekke}>
                     {TILLAEG_TYPER.map((type) => {
                         const valgt = type === tillaegType;
@@ -256,7 +262,8 @@ export default function SaelgTimerScreen() {
                     })}
                 </View>
 
-                {tillaegType !== 'Ingen' && ( // <------
+                {/* Beløbsfeltet vises kun hvis der er valgt en type, da det ikke giver mening at skrive et beløb på Ingen  <----------- */}
+                {tillaegType !== 'Ingen' && (
                     <>
                         <Text style={globalStyles.feltLabel}>TILLÆG (KR)</Text>
                         <TextInput
@@ -278,7 +285,8 @@ export default function SaelgTimerScreen() {
                     <Text style={globalStyles.hjaelpetekst}>
                         {medarbejder.navn} får sin normale løn fra jer.
                     </Text>
-                    <Text style={globalStyles.hjaelpetekst}>{/* <------ */}
+                    {/* Tillægget står altid i opsummeringen, også når det er Ingen, så det er tydeligt hvad bartenderen får  <-------------*/}
+                    <Text style={globalStyles.hjaelpetekst}>
                         {tillaegType === 'Ingen'
                             ? 'Tillæg: Ingen'
                             : 'Tillæg: ' + tillaegType + ' · ' + (tillaegTal > 0 ? tillaegTal : '—') + ' kr til ' + medarbejder.navn}
