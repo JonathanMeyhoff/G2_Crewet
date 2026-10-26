@@ -1,55 +1,54 @@
-# CrewNet
+# CrewNet – version 2
 
-App til Godkendelsesopgave 1 i Innovation og Ny Teknologi, HA(it.) på CBS.
+App til Godkendelsesopgave 2 i Innovation og Ny Teknologi, HA(it.) på CBS. Bygger videre på CrewNet fra Godkendelsesopgave 1 ([G1_AppRepo](https://github.com/JonathanMeyhoff/G1_AppRepo)).
 
-CrewNet er en app hvor barer køber og sælger arbejdstimer af hinanden, altså B2B. 
+CrewNet er en app hvor barer køber og sælger arbejdstimer af hinanden, altså B2B. En bar med stille perioder kan udbyde sine overskudstimer, og en bar der mangler folk kan købe dem. Fordi det er ansatte med dokumenteret erfaring, kan køberen se præcis hvem de får.
 
-Problemet er todelt. Den ene side er de timer der går til spilde når der er stille og barer betaler for bartendere de ikke har brug for. Den anden er den akutte mangel, som kan 
-opstå på en fredag aften, hvor de eneste muligheder er at ringe til dem man kender eller en vikar man aldrig har set før.
-CrewNet understøtter salget af timer fra den ene bar til den anden og fordi det er ansatte med dokumenteret erfaring, kan køberen se præcis hvem de får.
-
-Appen er bygget fra barchefens side. 
+Appen er bygget fra en barmangers side.
 
 ## Demovideo
 
-https://www.youtube.com/watch?v=9DlxpMa-04k
+INDSÆT LINK TIL DEMOVIDEO
 
-## Hvad appen kan
+## Nyt i G2
+Alt ny kode er kommenteret og markeret med en pil "<-------" for at adskilde det fra G1, kommentarerne. Dette er gjort med henblik på at det måske ikke er den samme person som gennemser koden.
 
-**Køb vagter** — liste over ledige vagter fra andre barer. Trykker man på en vagt, ser man detaljerne, hvem medarbejderen er, hvor mange verificerede timer
-vedkommende har, og hvilken bar der giver god for personen. Herfra bookes vagten også.
+**Kort** — en ny fane i bundmenuen. Kortet viser en nål pr. bar med antal ledige bartendere. Ens egen bar har en guld nål. Øverst kan man skifte mellem Helsingør og København, og kortet starter ved ens egen bar.
 
-**Sælg timer** — er en formular hvor baren lægger sine egne overskudstimer op. Man vælger en af sine ansatte, en rolle, dato, tidsrum, antal timer og timeløn. Beløbet regnes
-ud mens man skriver.
+**Tillæg til bartenderen** — en bar kan give et tillæg på sine egne vagter for at gøre dem mere attraktive. Man vælger en af følgende typer: "Ingen, Transport, Akut eller Kort varsel" og skriver selv beløbet.
+- I **Sælg timer** vælges tillægget når vagten oprettes.
+- I **Oversigt** ligger knappen "Tillæg" ved siden af Træk tilbage, så man kan tilføje eller rette tillægget, hvis vagten ikke bliver taget.
+- På **Vagtdetaljer** står tillægget sammen med de andre oplysninger og er lagt til den samlede beregning
+- **Netto** i Oversigt tager tillægget med på de vagter man har købt.
 
-**Oversigt** — hvad baren har købt, hvad den har udbudt, og nøgletal for solgte timer, købte timer og netto. Et udbud der ikke er solgt kan trækkes tilbage. En
-solgt vagt kan ikke, for så er det en aftale med en anden bar.
+**Vis på kort** — en ny knap på Vagtdetaljer, som skifter til kortet og zoomer ind på den bar vagten kommer fra. Så kan man se hvor langt bartenderen skal rejse.
 
-Alt data ligger i Firebase Realtime Database, så listerne opdaterers live på alle enheder når en vagt oprettes eller bookes.
+Ændringerne bygger på interviews med bartendere, som er den side af platformen der bliver udlånt. Baggrunden står i rapporten.
 
-## Teknologi
-- React Native med Expo og Expo Go
-- React Navigation — bundfaner med en stack under fanen Køb vagter
-- Firebase Realtime Database
+Kode uden pil er fra G1
+
+## Data i Firebase
+
+Alt data ligger i Firebase Realtime Database, så listerne og kortet opdateres live.
+
+- `vagter` — som i G1, plus de nye felter `tillaeg` (type) og `tillaegBeloeb` (kr).
+- `barer` — nyt i G2. En post pr. bar med `latitude`, `longitude` og `omraade`. Barens navn er nøglen, så kortet kan finde baren ud fra vagtens `virksomhed`.
 
 Forbindelsen står i `crewnet/firebaseConfig.js` og peger på et kørende Firebase-projekt, så appen virker uden at man selv skal sætte noget op.
 
-## Sådan kører man projektet + Krav 
+## Sådan kører man projektet + Krav
 
 Man skal have to ting inden:
 
-- **Node.js** (version 18 eller nyere) på computeren — hentes på nodejs.org.
+- **Node.js** (version 20 eller nyere) på computeren — hentes på nodejs.org.
   Tjek med `node -v` i terminalen.
-- **Expo Go** på telefonen — findes gratis i App Store og Google Play.
+- **Expo Go** i nyeste version på telefonen — findes gratis i App Store og Google Play.
 
 Så klones projektet og startes:
 
-```bash
-git clone https://github.com/JonathanMeyhoff/G1_AppRepo.git
-cd G1_AppRepo/crewnet
+git clone https://github.com/JonathanMeyhoff/G2_Crewet.git
+cd G2_Crewet/crewnet
 npm install
 npx expo start
-```
 
 Scan QR-koden med Expo Go på telefonen.
-
