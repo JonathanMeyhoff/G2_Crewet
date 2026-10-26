@@ -24,8 +24,37 @@ const kortBase = {
     borderRadius: 8,
 };
 
+
 export const globalStyles = StyleSheet.create({
     // ---------- Skærmens ramme ----------
+    
+    kortSkaerm: { flex: 1 },
+    omraadeVaelger: { 
+        position: 'absolute',
+        top: 12,
+        left: 12,
+        flexDirection: 'row',
+        gap: 8,
+    },
+    knapRaekke: { flexDirection: 'row', gap: 8 }, // <------
+    tillaegKnap: { // <------
+        alignSelf: 'flex-start',
+        marginTop: 12,
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        borderRadius: 6,
+        borderWidth: 1,
+        borderColor: colors.accent,
+        minHeight: 40,
+        justifyContent: 'center',
+    },
+    tillaegTekst: { color: colors.accent, fontSize: 13 }, // <------
+    tillaegValg: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 10 }, // <------
+    tillaegInput: { marginTop: 10 }, // <------
+    
+    
+// Alt herunder er det samme som fra G1, altså denn styling der blev brugt til CrewNet v.1 <------- 
+
     skaerm: {
         flex: 1,
         backgroundColor: colors.baggrund,

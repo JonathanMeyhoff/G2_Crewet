@@ -12,6 +12,7 @@ import ButtonComponent from '../components/ButtonComponent';
 
 // De roller en bar kan udbyde deres medarbejdere som. Ligger her fordi de kun bruges på denne skærm. 
 const ROLLER = ['Bartender', 'Cocktailbartender', 'Barback'];
+export const TILLAEG_TYPER = ['Ingen', 'Transport', 'Akut', 'Kort varsel']; // <------
 
 export default function SaelgTimerScreen() {
 
@@ -23,6 +24,8 @@ export default function SaelgTimerScreen() {
     const [til, setTil] = useState('');
     const [timer, setTimer] = useState('');
     const [timeloen, setTimeloen] = useState('');
+    const [tillaegType, setTillaegType] = useState('Ingen'); // <------
+    const [tillaegBeloeb, setTillaegBeloeb] = useState(''); // <------
 
     //En funktion til at slå knappen "Udbyd vagt" midlertidigt fra mens man skrive så man ikke kan nå at trykke to gange og oprette vagten dobbelt.
     const [gemmer, setGemmer] = useState(false);
@@ -31,6 +34,7 @@ export default function SaelgTimerScreen() {
     const timerTal = Number(timer);
     const loenTal = Number(timeloen);
     const ialt = timerTal * loenTal;
+    const tillaegTal = tillaegType === 'Ingen' ? 0 : Number(tillaegBeloeb); // <------
 
     //Nulstille formularen når vagten er lagt op så man kan lave den næste med det samme
     const nulstil = () => {
@@ -41,6 +45,8 @@ export default function SaelgTimerScreen() {
         setTimeloen('');
         setMedarbejder(MINE_MEDARBEJDERE[0]);
         setRolle(ROLLER[0]);
+        setTillaegType('Ingen'); // <------
+        setTillaegBeloeb(''); // <------
     };
 
     const udbydVagt = async () => {
@@ -62,6 +68,11 @@ export default function SaelgTimerScreen() {
             return;
         }
 
+        if (tillaegType !== 'Ingen' && (isNaN(tillaegTal) || tillaegTal <= 0)) { // <------
+            Alert.alert('Ugyldigt tillæg', 'Skriv et beløb større end 0, eller vælg "Ingen".');
+            return;
+        }
+
         try {
             setGemmer(true);
 
@@ -77,6 +88,8 @@ export default function SaelgTimerScreen() {
                 verificeredeTimer: medarbejder.verificeredeTimer,
                 status: 'ledig',
                 booket_af: '',
+                tillaeg: tillaegType, // <------
+                tillaegBeloeb: tillaegTal, // <------
             });
 
             nulstil();
@@ -217,6 +230,46 @@ export default function SaelgTimerScreen() {
                     </View>
                 </View>
 
+                <Text style={globalStyles.feltLabel}>TILLÆG TIL BARTENDEREN</Text>{/* <------ */}
+                <View style={globalStyles.valgRaekke}>
+                    {TILLAEG_TYPER.map((type) => {
+                        const valgt = type === tillaegType;
+                        return (
+                            <Pressable
+                                key={type}
+                                onPress={() => setTillaegType(type)}
+                                style={[
+                                    globalStyles.valgChip,
+                                    valgt && globalStyles.valgChipAktiv,
+                                ]}
+                            >
+                                <Text
+                                    style={[
+                                        globalStyles.valgChipTekst,
+                                        valgt && globalStyles.valgChipTekstAktiv,
+                                    ]}
+                                >
+                                    {type}
+                                </Text>
+                            </Pressable>
+                        );
+                    })}
+                </View>
+
+                {tillaegType !== 'Ingen' && ( // <------
+                    <>
+                        <Text style={globalStyles.feltLabel}>TILLÆG (KR)</Text>
+                        <TextInput
+                            style={globalStyles.input}
+                            value={tillaegBeloeb}
+                            onChangeText={setTillaegBeloeb}
+                            placeholder="150"
+                            placeholderTextColor={colors.svag}
+                            keyboardType="number-pad"
+                        />
+                    </>
+                )}
+
                 <View style={globalStyles.opsummering}>
                     <Text style={globalStyles.opsummeringTal}>
                         {/* Viser kun et beløb når begge tal er rigtige */}
@@ -224,6 +277,11 @@ export default function SaelgTimerScreen() {
                     </Text>
                     <Text style={globalStyles.hjaelpetekst}>
                         {medarbejder.navn} får sin normale løn fra jer.
+                    </Text>
+                    <Text style={globalStyles.hjaelpetekst}>{/* <------ */}
+                        {tillaegType === 'Ingen'
+                            ? 'Tillæg: Ingen'
+                            : 'Tillæg: ' + tillaegType + ' · ' + (tillaegTal > 0 ? tillaegTal : '—') + ' kr til ' + medarbejder.navn}
                     </Text>
                 </View>
 

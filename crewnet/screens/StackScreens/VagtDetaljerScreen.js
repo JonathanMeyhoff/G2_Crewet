@@ -22,6 +22,10 @@ export default function VagtDetaljerScreen({ navigation, route }) { //Den bruger
         navigation.goBack();
     };
 
+    const visPaaKort = () => { // Dette er den en af de nye G2 knapper, den gør at den knap jeg har lavet, kan vise baren på kortet. Den henter en vagts bar og barens lokation fra firebase  <------ 
+        navigation.navigate('Kort', { bar: vagt.virksomhed, tid: Date.now() });
+    };
+
     return (
         <View style={globalStyles.skaermMedPadding}>
             <Text style={globalStyles.overskrift}>{vagt.virksomhed}</Text>
@@ -44,9 +48,15 @@ export default function VagtDetaljerScreen({ navigation, route }) { //Den bruger
                 <Text style={globalStyles.label}>TIMELØN</Text>
                 <Text style={globalStyles.vaerdi}>{vagt.timeloen} kr/t</Text>
             </View>
+            <View style={globalStyles.raekke}>{/* <------ */}
+                <Text style={globalStyles.label}>TILLÆG</Text>
+                <Text style={globalStyles.vaerdi}>
+                    {vagt.tillaegBeloeb > 0 ? vagt.tillaeg + ' · ' + vagt.tillaegBeloeb + ' kr' : 'Ingen'}
+                </Text>
+            </View>
             <View style={globalStyles.raekke}>
                 <Text style={globalStyles.label}>I ALT</Text>
-                <Text style={globalStyles.vaerdi}>{vagt.timer * vagt.timeloen} kr</Text>
+                <Text style={globalStyles.vaerdi}>{vagt.timer * vagt.timeloen + (vagt.tillaegBeloeb || 0)} kr</Text>{/* <------ */}
             </View>
 
             {/* Herunder er det element, der adskiller CrewNet fra en åben vikarapp. Køberen kan se, hvem der giver god for bartenderen. Reelt set også bare mere information*/}
@@ -66,6 +76,7 @@ export default function VagtDetaljerScreen({ navigation, route }) { //Den bruger
                 Medarbejderen får sin normale løn. I betaler {vagt.virksomhed} for timerne.
             </Text>
 
+            <ButtonComponent title="Vis på kort" onPress={visPaaKort} />{/* <------ */}
             <ButtonComponent title="Book Crew" onPress={bookCrew} />
             <ButtonComponent title="Tilbage" onPress={() => navigation.goBack()} />
         </View>
